@@ -1,5 +1,4 @@
 # elevate-devops-task2
-Task 2 for Elevate Labs DevOps Internship
 Simple Jenkins CI/CD Pipeline Project
 This project demonstrates a basic Continuous Integration and Continuous Deployment (CI/CD) pipeline using Jenkins and Docker. The pipeline automates the process of building, testing, and deploying a simple Python Flask web application.
 
