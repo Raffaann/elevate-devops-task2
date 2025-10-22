@@ -1,44 +1,28 @@
 pipeline {
-    // This is the main change.
-    // We are now running the pipeline inside a container
-    // that is built from the 'docker:latest' image.
+    // This 'agent' block is provided by the Docker Pipeline plugin.
+    // It tells Jenkins to run all stages in a 'docker:latest' container.
     agent {
         docker {
             image 'docker:latest'
-            // This is CRITICAL. It maps the host's Docker socket (the engine)
-            // into this new agent container, allowing it to run Docker commands.
+            // This mounts the host's Docker socket into the container,
+            // allowing this container to run "Docker-in-Docker" commands.
             args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
-
+    
     stages {
-        // Stage 1: Build the Docker image
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Building the Docker image...'
-                // This 'sh' command now runs inside the 'docker:latest'
-                // container and will succeed.
-                sh 'docker build -t task2-app .'
+                echo 'Building the image...'
+                // This 'sh' command now runs inside the 'docker:latest' 
+                // container, so the 'docker' command is available.
+                sh 'docker build -t my-app:latest .'
             }
         }
-
-        // Stage 2: A simple test
-        stage('Test') {
+        stage('Run Tests') {
             steps {
-                echo 'Testing the image...'
-                sh 'docker run --rm task2-app ls /usr/share/nginx/html/index.html'
-            }
-        }
-
-        // Stage 3: Deploy the application
-        stage('Deploy') {
-            steps {
-                echo 'Deploying the application...'
-                // These commands will also work now.
-                sh 'docker stop task2-web-app || true'
-                sh 'docker rm task2-web-app || true'
-                sh 'docker run -d -p 8081:80 --name task2-web-app task2-app'
-                echo 'Application deployed! Access it at http://localhost:8081'
+                echo 'Running tests...'
+                sh 'docker run --rm my-app:latest npm test'
             }
         }
     }
